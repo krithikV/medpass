@@ -19,7 +19,7 @@ const sanitizeToString = (value) => {
   return String(value);
 };
 
-const API_BASE = 'http://api.mediimpact.in/index.php';
+const API_BASE = 'https://api.mediimpact.in/index.php';
 
 // Store user data after successful login
 export const storeUserData = async (userData, phoneNumber) => {

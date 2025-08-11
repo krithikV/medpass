@@ -75,7 +75,7 @@ export default function PaymentScreen({ navigation, route }) {
       body.append('desc', 'Consultation payment');
       body.append('partycode', '');
 
-      const resp = await fetch('http://api.mediimpact.in/index.php/Wallet/makeTransaction', {
+      const resp = await fetch('https://api.mediimpact.in/index.php/Wallet/makeTransaction', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',

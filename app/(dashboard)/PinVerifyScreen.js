@@ -96,7 +96,7 @@ export default function PinVerifyScreen({ navigation, route }) {
       const body = new URLSearchParams();
       body.append('pin', pin);
       body.append('pin_status', '1');
-      const resp = await fetch('http://api.mediimpact.in/index.php/User/setPin', {
+      const resp = await fetch('https://api.mediimpact.in/index.php/User/setPin', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
@@ -148,7 +148,7 @@ export default function PinVerifyScreen({ navigation, route }) {
       if (isEnabled) {
         const body = new URLSearchParams();
         body.append('pin', pin);
-        const resp = await fetch('http://api.mediimpact.in/index.php/User/checkPin', {
+        const resp = await fetch('https://api.mediimpact.in/index.php/User/checkPin', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -198,7 +198,7 @@ export default function PinVerifyScreen({ navigation, route }) {
       const body = new URLSearchParams();
       body.append('pin', '');
       body.append('pin_status', '0');
-      const resp = await fetch('http://api.mediimpact.in/index.php/User/setPin', {
+      const resp = await fetch('https://api.mediimpact.in/index.php/User/setPin', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
@@ -248,7 +248,7 @@ export default function PinVerifyScreen({ navigation, route }) {
       body.append('ba_code', '');
       body.append('desc', desc || 'Consultation payment');
       body.append('partycode', '');
-      const resp = await fetch('http://api.mediimpact.in/index.php/Wallet/makeTransaction', {
+      const resp = await fetch('https://api.mediimpact.in/index.php/Wallet/makeTransaction', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',

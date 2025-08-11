@@ -63,7 +63,7 @@ export default function WalletScreen({ navigation }) {
       const token = creds?.token;
       const userId = creds?.userId;
       if (!token || !userId) return;
-      const resp = await fetch('http://api.mediimpact.in/index.php/User/User_info', {
+      const resp = await fetch('https://api.mediimpact.in/index.php/User/User_info', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
@@ -108,7 +108,7 @@ export default function WalletScreen({ navigation }) {
       const userId = creds?.userId;
       if (!token || !userId) return;
       setIsTxLoading(true);
-      const resp = await fetch('http://api.mediimpact.in/index.php/Wallet/transactionReport', {
+      const resp = await fetch('https://api.mediimpact.in/index.php/Wallet/transactionReport', {
         method: 'GET',
         headers: {
           token,
@@ -223,7 +223,7 @@ export default function WalletScreen({ navigation }) {
       const body = new URLSearchParams();
       body.append('otp', '');
       body.append('transaction_id', '');
-      const resp = await fetch('http://api.mediimpact.in/index.php/Wallet/resendUserRegOTP', {
+      const resp = await fetch('https://api.mediimpact.in/index.php/Wallet/resendUserRegOTP', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
@@ -271,7 +271,7 @@ export default function WalletScreen({ navigation }) {
       setIsVerifying(true);
       const body = new URLSearchParams();
       body.append('otp', code);
-      const resp = await fetch('http://api.mediimpact.in/index.php/Wallet/otp_validation', {
+      const resp = await fetch('https://api.mediimpact.in/index.php/Wallet/otp_validation', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',

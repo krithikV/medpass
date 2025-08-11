@@ -61,7 +61,7 @@ export default function AddMoneyScreen({ navigation }) {
       const body = new URLSearchParams();
       body.append('amount', String(numeric));
 
-      const resp = await fetch('http://api.mediimpact.in/index.php/Home/pay', {
+      const resp = await fetch('https://api.mediimpact.in/index.php/Home/pay', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',

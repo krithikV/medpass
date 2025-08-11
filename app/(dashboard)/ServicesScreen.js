@@ -187,7 +187,7 @@ export default function ServicesScreen({ navigation, route }) {
           longitude = 76.026344;
         }
 
-        const url = `http://api.mediimpact.in/index.php/user/get_merchants?id=${serviceId}&lat=${latitude}&lng=${longitude}`;
+        const url = `https://api.mediimpact.in/index.php/user/get_merchants?id=${serviceId}&lat=${latitude}&lng=${longitude}`;
         const res = await fetch(url);
         if (!res.ok) {
           throw new Error(`Request failed: ${res.status}`);

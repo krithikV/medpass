@@ -175,7 +175,7 @@ export default function EditProfileScreen({ navigation }) {
       console.log('Sending profile update to API:', apiData);
 
       // Make API call
-      const response = await fetch('http://api.mediimpact.in/index.php/Wallet/registerUser', {
+      const response = await fetch('https://api.mediimpact.in/index.php/Wallet/registerUser', {
         method: 'POST',
         headers: {
           'User-ID': userId,
@@ -444,7 +444,7 @@ export default function EditProfileScreen({ navigation }) {
 
       const doUpload = async (attempt) => {
         console.log(`Upload KYC attempt ${attempt}`);
-        const response = await fetch('http://api.mediimpact.in/index.php/Wallet/UpgradeKYC', {
+        const response = await fetch('https://api.mediimpact.in/index.php/Wallet/UpgradeKYC', {
           method: 'POST',
           headers: {
             'User-ID': userId,
