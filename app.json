@@ -20,6 +20,7 @@
       "bundleIdentifier": "com.mediimpact.medpass"
     },
     "android": {
+      "enableEdgeToEdge": true,
       "adaptiveIcon": {
         "foregroundImage": "./assets/med-icon.png",
         "backgroundColor": "#ffffff"
