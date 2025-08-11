@@ -49,6 +49,7 @@ export default function WalletScreen({ navigation }) {
   const [transactions, setTransactions] = useState([]);
   const [isTxLoading, setIsTxLoading] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [cashback, setCashback] = useState(null);
   const slideAnim = useRef(new Animated.Value(-width * 0.8)).current;
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const inputRefs = useRef([]);
@@ -56,6 +57,28 @@ export default function WalletScreen({ navigation }) {
   useEffect(() => {
     loadUserData();
   }, []);
+
+  const fetchUserInfoCashback = async (creds) => {
+    try {
+      const token = creds?.token;
+      const userId = creds?.userId;
+      if (!token || !userId) return;
+      const resp = await fetch('http://api.mediimpact.in/index.php/User/User_info', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          token,
+          'User-ID': userId,
+          version: '10007',
+        },
+      });
+      const data = await resp.json().catch(() => ({}));
+      if (resp.ok && data) {
+        const cb = Number(data?.cashback ?? data?.user_data?.cashback);
+        if (Number.isFinite(cb)) setCashback(cb);
+      }
+    } catch (_) {}
+  };
 
   const loadUserData = async () => {
     try {
@@ -65,6 +88,8 @@ export default function WalletScreen({ navigation }) {
         setUserData(data);
         // Fetch transactions once credentials are present
         fetchTransactions(data);
+        // Fetch cashback from User/User_info
+        fetchUserInfoCashback(data);
       }
       const walletResp = await fetchWalletStatus();
       if (walletResp?.ok) {
@@ -113,6 +138,7 @@ export default function WalletScreen({ navigation }) {
         const updated = await getUserData();
         setUserData(updated);
         await fetchTransactions(updated);
+        await fetchUserInfoCashback(updated);
         // Also refresh wallet status from dedicated API
         const walletResp = await fetchWalletStatus();
         if (walletResp?.ok) {
@@ -120,6 +146,7 @@ export default function WalletScreen({ navigation }) {
         }
       } else if (userData) {
         await fetchTransactions(userData);
+        await fetchUserInfoCashback(userData);
       }
     } finally {
       setIsRefreshing(false);
@@ -393,7 +420,7 @@ export default function WalletScreen({ navigation }) {
   };
 
   const renderMoneySavedCard = () => {
-    const savedAmount = userData?.userData?.cc_balance ?? '0';
+    const savedAmount = (cashback != null ? cashback : (userData?.userData?.cc_balance ?? '0'));
     const available = userData?.userBalance ?? '0';
     return (
       <View style={styles.moneySavedCard}>

@@ -42,7 +42,11 @@ export default function PaymentScreen({ navigation, route }) {
 
   const handlePay = async () => {
     const numeric = Number(amount);
-    if (!amount || Number.isNaN(numeric) || numeric <= 0) {
+    const balanceNum = Number(userData?.userBalance || 0);
+    if (!amount || Number.isNaN(numeric) || numeric < 1) {
+      return;
+    }
+    if (Number.isFinite(balanceNum) && numeric > balanceNum) {
       return;
     }
 
@@ -146,10 +150,10 @@ export default function PaymentScreen({ navigation, route }) {
             <TouchableOpacity 
               style={[
                 styles.addButton,
-                ((!amount || Number(amount) <= 0) || isLoading) && styles.addButtonDisabled,
+                ((!amount || Number(amount) < 1 || (Number(userData?.userBalance||0) < Number(amount))) || isLoading) && styles.addButtonDisabled,
               ]}
               onPress={handlePay}
-              disabled={!amount || Number(amount) <= 0 || isLoading}
+              disabled={!amount || Number(amount) < 1 || (Number(userData?.userBalance||0) < Number(amount)) || isLoading}
             >
               <Text style={styles.addButtonText}>{isLoading ? 'Processing…' : 'Pay'}</Text>
             </TouchableOpacity>

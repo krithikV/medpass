@@ -45,6 +45,7 @@ export default function ProfileScreen({ navigation }) {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [walletStatusActual, setWalletStatusActual] = useState(undefined);
   const [isPinEnabled, setIsPinEnabled] = useState(false);
+  const [shownRejectedAlert, setShownRejectedAlert] = useState(false);
   const slideAnim = useRef(new Animated.Value(-width * 0.8)).current;
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const isMountedRef = useRef(true);
@@ -76,6 +77,19 @@ export default function ProfileScreen({ navigation }) {
   useEffect(() => {
     loadUserData();
   }, []);
+
+  // Show KYC rejected alert once when profile loads if applicable
+  useEffect(() => {
+    try {
+      const kycRaw = userData?.userData?.kyc_code ?? userData?.userData?.kyc_status;
+      const kyc = kycRaw != null ? String(kycRaw) : undefined;
+      if (!shownRejectedAlert && kyc === '5') {
+        const reason = userData?.userData?.reject_reason || 'Your KYC was rejected.';
+        Alert.alert('KYC Rejected', reason);
+        setShownRejectedAlert(true);
+      }
+    } catch (_) {}
+  }, [userData, shownRejectedAlert]);
 
   useEffect(() => {
     // Load stored pin preference
@@ -321,7 +335,17 @@ export default function ProfileScreen({ navigation }) {
             return (
               <View style={styles.balanceRow}>
                 <Text style={styles.balanceLabel}>KYC</Text>
-                <TouchableOpacity style={styles.walletCtaButton} onPress={() => navigation.navigate('ProfileScreen')}>
+                <TouchableOpacity style={styles.walletCtaButton} onPress={() => navigation.navigate('EditProfileScreen', { scrollToBottom: true })}>
+                  <Text style={styles.walletCtaText}>Upgrade KYC</Text>
+                </TouchableOpacity>
+              </View>
+            );
+          }
+          if (kyc === '5') {
+            return (
+              <View style={styles.balanceRow}>
+                <Text style={styles.balanceLabel}>KYC</Text>
+                <TouchableOpacity style={styles.walletCtaButton} onPress={() => navigation.navigate('EditProfileScreen', { scrollToBottom: true })}>
                   <Text style={styles.walletCtaText}>Upgrade KYC</Text>
                 </TouchableOpacity>
               </View>

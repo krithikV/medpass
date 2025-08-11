@@ -100,7 +100,7 @@ export default function LoginScreen({ navigation }) {
 
             {/* Title and subtitle */}
             <View style={styles.titleContainer}>
-              <Text style={styles.title}>Enter your Phone</Text>
+              <Text style={styles.title}>Log in / Sign up</Text>
               <Text style={styles.subtitle}>
                 We will send you a one-time password to this mobile number
               </Text>
@@ -148,12 +148,7 @@ export default function LoginScreen({ navigation }) {
               )}
             </TouchableOpacity>
 
-            {/* Sign up link */}
-            <View style={styles.signupContainer}>
-              <Text style={styles.signupText}>
-                Already have an account? <Text style={styles.signupLink} onPress={() => navigation.navigate('SignupScreen')}>Sign up</Text>
-              </Text>
-            </View>
+            {/* Signup link removed per requirement */}
 
             {/* Bottom decoration */}
             <View style={styles.bottomDecoration}>

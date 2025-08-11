@@ -5,8 +5,8 @@ import images from '../../assets/images';
 const { width, height } = Dimensions.get('window');
 
 export default function WelcomeUserScreen({ navigation, route }) {
-  // Get user name from navigation params, default to "Selvarani"
-  const userName = route?.params?.userName || 'Selvarani';
+  // Get user name from navigation params, default to blank if missing
+  const userName = route?.params?.userName || '';
 
   useEffect(() => {
     // Auto redirect to HomeScreen after 3 seconds

@@ -46,7 +46,7 @@ export default function AddMoneyScreen({ navigation }) {
 
   const handleAddMoney = async () => {
     const numeric = Number(amount);
-    if (!amount || Number.isNaN(numeric) || numeric <= 0) {
+    if (!amount || Number.isNaN(numeric) || numeric < 10) {
       return;
     }
 
@@ -136,6 +136,11 @@ export default function AddMoneyScreen({ navigation }) {
 
         <KeyboardAvoidingView style={{ flex: 1, backgroundColor: COLORS.white }} behavior={Platform.select({ ios: 'padding', android: undefined })}>
           <ScrollView style={styles.content} contentContainerStyle={styles.centerContent}>
+            {/* Validation message */}
+            {amount && Number(amount) < 10 ? (
+              <Text style={styles.validationText}>The minimum amount you can add is ₹10</Text>
+            ) : null}
+
             {/* Centered amount input */}
             <View style={styles.centerAmountWrap}>
               <Text style={styles.centerCurrency}>₹</Text>
@@ -160,10 +165,10 @@ export default function AddMoneyScreen({ navigation }) {
             <TouchableOpacity 
               style={[
                 styles.addButton,
-                ((!amount || Number(amount) <= 0) || isLoading) && styles.addButtonDisabled,
+                ((!amount || Number(amount) < 10) || isLoading) && styles.addButtonDisabled,
               ]}
               onPress={handleAddMoney}
-              disabled={!amount || Number(amount) <= 0 || isLoading}
+              disabled={!amount || Number(amount) < 10 || isLoading}
             >
               <Text style={styles.addButtonText}>{isLoading ? 'Processing…' : 'Add money'}</Text>
             </TouchableOpacity>
@@ -275,6 +280,11 @@ const styles = StyleSheet.create({
     fontFamily: 'Satoshi Variable',
     fontWeight: '400',
     fontSize: 14,
+  },
+  validationText: {
+    color: '#F44336',
+    fontSize: 12,
+    marginBottom: 6,
   },
   balancePillWrapper: {
     alignItems: 'center',

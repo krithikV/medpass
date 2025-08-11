@@ -129,23 +129,13 @@ export default function OTPScreen({ navigation, route }) {
       console.log('OTP Verification Response:', data);
 
       if (data.status === 200) {
-        // Success - store user data and navigate
+        // Success - store user data and navigate directly (no success dialog)
         const storageSuccess = await storeUserData(data, phoneNumber);
-        
         if (storageSuccess) {
-          Alert.alert(
-            'Login Successful', 
-            `Welcome back, ${data.name}!`,
-            [
-              {
-                text: 'Continue',
-                onPress: () => navigation.navigate('WelcomeUserScreen', { 
-                  userName: data.name,
-                  userId: data.userId
-                })
-              }
-            ]
-          );
+          navigation.navigate('WelcomeUserScreen', { 
+            userName: data.name,
+            userId: data.userId
+          });
         } else {
           Alert.alert('Storage Error', 'Login successful but failed to save user data. Please try again.');
         }

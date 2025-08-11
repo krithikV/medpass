@@ -40,17 +40,7 @@ export default function AuthScreen({ navigation }) {
           style={styles.loginButton}
           onPress={() => navigation.navigate('LoginScreen')}
         >
-          <Text style={styles.loginButtonText}>Log in</Text>
-        </TouchableOpacity>
-        
-        <TouchableOpacity 
-          style={styles.signupButton}
-          onPress={() => {
-            console.log('Signup button pressed');
-            navigation.navigate('SignupScreen');
-          }}
-        >
-          <Text style={styles.signupButtonText}>Sign up</Text>
+          <Text style={styles.loginButtonText}>Log in / Sign up</Text>
         </TouchableOpacity>
       </View>
     </View>

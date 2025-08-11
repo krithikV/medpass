@@ -39,6 +39,8 @@ const COLORS = {
 
 export default function EditProfileScreen({ navigation }) {
   const insets = useSafeAreaInsets();
+  const scrollRef = React.useRef(null);
+  const route = React.useRef(null);
   const [userData, setUserData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -46,6 +48,7 @@ export default function EditProfileScreen({ navigation }) {
   const [isUploadingKyc, setIsUploadingKyc] = useState(false);
   const [idProofAsset, setIdProofAsset] = useState(null);
   const [addressProofAsset, setAddressProofAsset] = useState(null);
+  const canUploadKyc = !!(idProofAsset && addressProofAsset);
   
   // Form state
   const [formData, setFormData] = useState({
@@ -70,6 +73,18 @@ export default function EditProfileScreen({ navigation }) {
   useEffect(() => {
     loadUserData();
   }, []);
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      try {
+        const params = navigation?.getState?.()?.routes?.slice(-1)?.[0]?.params;
+        if (params?.scrollToBottom && scrollRef.current) {
+          scrollRef.current.scrollToEnd({ animated: true });
+        }
+      } catch {}
+    }, 400);
+    return () => clearTimeout(timeout);
+  }, [navigation]);
 
   const loadUserData = async () => {
     try {
@@ -325,13 +340,14 @@ export default function EditProfileScreen({ navigation }) {
     setter({ uri: a.uri, name: inferName(a.uri, 'image.jpg'), type: 'image/jpeg', size: info.size || 0 });
   };
 
-  const pickFromCamera = async (setter) => {
-    const perm = await ImagePicker.requestCameraPermissionsAsync();
+  // Simple image picker restricted to jpg/jpeg/png for ID proof
+  const pickIdProofImage = async () => {
+    const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (perm.status !== 'granted') {
-      Alert.alert('Permission needed', 'Camera access is required to take a photo.');
+      Alert.alert('Permission needed', 'Gallery access is required to pick an image.');
       return;
     }
-    const res = await ImagePicker.launchCameraAsync({ quality: 0.9 });
+    const res = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ImagePicker.MediaTypeOptions.Images, quality: 0.9 });
     if (res.canceled) return;
     const a = res.assets?.[0];
     if (!a) return;
@@ -340,12 +356,53 @@ export default function EditProfileScreen({ navigation }) {
       Alert.alert('File too large', 'Each file must be under 2 MB.');
       return;
     }
-    setter({ uri: a.uri, name: inferName(a.uri, 'image.jpg'), type: 'image/jpeg', size: info.size || 0 });
+    const name = inferName(a.uri, 'image');
+    const ext = name.split('.').pop()?.toLowerCase() || '';
+    if (!['jpg', 'jpeg', 'png'].includes(ext)) {
+      Alert.alert('Invalid format', 'Please select a JPG, JPEG, or PNG image.');
+      return;
+    }
+    setIdProofAsset({ uri: a.uri, name: name.endsWith(ext) ? name : `${name}.${ext}`, type: ext === 'png' ? 'image/png' : 'image/jpeg', size: info.size || 0 });
+  };
+
+  const pickAddressProofImage = async () => {
+    const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (perm.status !== 'granted') {
+      Alert.alert('Permission needed', 'Gallery access is required to pick an image.');
+      return;
+    }
+    const res = await ImagePicker.launchImageLibraryAsync({ mediaTypes: ImagePicker.MediaTypeOptions.Images, quality: 0.9 });
+    if (res.canceled) return;
+    const a = res.assets?.[0];
+    if (!a) return;
+    const info = await FileSystem.getInfoAsync(a.uri);
+    if (info.size && info.size > twoMB) {
+      Alert.alert('File too large', 'Each file must be under 2 MB.');
+      return;
+    }
+    const name = inferName(a.uri, 'image');
+    const ext = name.split('.').pop()?.toLowerCase() || '';
+    if (!['jpg', 'jpeg', 'png'].includes(ext)) {
+      Alert.alert('Invalid format', 'Please select a JPG, JPEG, or PNG image.');
+      return;
+    }
+    setAddressProofAsset({ uri: a.uri, name: name.endsWith(ext) ? name : `${name}.${ext}`, type: ext === 'png' ? 'image/png' : 'image/jpeg', size: info.size || 0 });
   };
 
   const handleUploadKyc = async () => {
-    if (!idProofAsset && !addressProofAsset) {
-      Alert.alert('No files selected', 'Please select at least one document to upload.');
+    console.log('Upload KYC clicked', {
+      hasIdProof: !!idProofAsset,
+      idProof: idProofAsset ? { name: idProofAsset.name, size: idProofAsset.size, type: idProofAsset.type } : null,
+      hasAddressProof: !!addressProofAsset,
+      addressProof: addressProofAsset ? { name: addressProofAsset.name, size: addressProofAsset.size, type: addressProofAsset.type } : null,
+      add_proof_type: formData.add_proof_type,
+      add_proof_no: formData.add_proof_no || originalAddProofNo,
+      id_proof_type: formData.id_proof_type,
+      id_proof_no: formData.id_proof_no,
+      email: formData.email,
+    });
+    if (!canUploadKyc) {
+      Alert.alert('Documents required', 'Please select both ID Proof and Address Proof images (max 2 MB each).');
       return;
     }
     try {
@@ -359,48 +416,64 @@ export default function EditProfileScreen({ navigation }) {
         return;
       }
 
-      const formDataToSend = new FormData();
-      if (addressProofAsset) {
-        formDataToSend.append('address_proof', {
-          uri: addressProofAsset.uri,
-          name: addressProofAsset.name,
-          type: addressProofAsset.type,
-        });
-      }
-      if (idProofAsset) {
-        formDataToSend.append('id_proof_file', {
-          uri: idProofAsset.uri,
-          name: idProofAsset.name,
-          type: idProofAsset.type,
-        });
-      }
-      // Include supporting fields
-      formDataToSend.append('add_proof_type', formData.add_proof_type || '');
-      formDataToSend.append('add_proof_no', formData.add_proof_no || originalAddProofNo || '');
-      formDataToSend.append('id_proof_type', formData.id_proof_type || '');
-      formDataToSend.append('id_proof_no', formData.id_proof_no || '');
-      formDataToSend.append('middlename', formData.middlename || '');
-      formDataToSend.append('mothers_maiden_name', formData.mothers_maiden_name || '');
-      formDataToSend.append('email', formData.email || '');
+      const buildFormData = () => {
+        const fd = new FormData();
+        if (addressProofAsset) {
+          fd.append('address_proof', {
+            uri: addressProofAsset.uri,
+            name: addressProofAsset.name,
+            type: addressProofAsset.type,
+          });
+        }
+        if (idProofAsset) {
+          fd.append('id_proof_file', {
+            uri: idProofAsset.uri,
+            name: idProofAsset.name,
+            type: idProofAsset.type,
+          });
+        }
+        fd.append('add_proof_type', formData.add_proof_type || '');
+        fd.append('add_proof_no', formData.add_proof_no || originalAddProofNo || '');
+        fd.append('id_proof_type', formData.id_proof_type || '');
+        fd.append('id_proof_no', formData.id_proof_no || '');
+        fd.append('middlename', formData.middlename || '');
+        fd.append('mothers_maiden_name', formData.mothers_maiden_name || '');
+        fd.append('email', formData.email || '');
+        return fd;
+      };
 
-      const response = await fetch('http://api.mediimpact.in/index.php/Wallet/UpgradeKYC', {
-        method: 'POST',
-        headers: {
-          'User-ID': userId,
-          'token': token,
-          // Do not set Content-Type manually; let fetch set correct multipart boundary
-          version: '10007',
-        },
-        body: formDataToSend,
-      });
+      const doUpload = async (attempt) => {
+        console.log(`Upload KYC attempt ${attempt}`);
+        const response = await fetch('http://api.mediimpact.in/index.php/Wallet/UpgradeKYC', {
+          method: 'POST',
+          headers: {
+            'User-ID': userId,
+            'token': token,
+            version: '10007',
+          },
+          body: buildFormData(),
+        });
+        const data = await response.json().catch(() => ({}));
+        console.log(`Upload KYC attempt ${attempt} status`, response.status, 'json', data);
+        return { ok: response.ok && data?.status === 200, data, httpOk: response.ok };
+      };
 
-      const data = await response.json().catch(() => ({}));
-      if (response.ok && data?.status === 200) {
-        Alert.alert('Success', data.message || 'KYC documents uploaded');
+      // Try up to 2 times
+      let result = await doUpload(1);
+      if (!result.ok) {
+        // brief wait before retry
+        await new Promise((r) => setTimeout(r, 500));
+        result = await doUpload(2);
+      }
+
+      if (result.ok) {
+        // Navigate back to Profile after successful upload
+        navigation.replace('ProfileScreen');
       } else {
-        Alert.alert('Error', data?.message || 'Invalid document format');
+        Alert.alert('Error', result.data?.message || 'Invalid document format');
       }
     } catch (e) {
+      console.log('Upload KYC error', e);
       Alert.alert('Error', e.message || 'Failed to upload KYC documents');
     } finally {
       setIsUploadingKyc(false);
@@ -471,6 +544,7 @@ export default function EditProfileScreen({ navigation }) {
             style={styles.content} 
             showsVerticalScrollIndicator={false}
             contentContainerStyle={styles.scrollContent}
+            ref={scrollRef}
           >
             {/* Personal Information */}
             <View style={styles.section}>
@@ -518,21 +592,11 @@ export default function EditProfileScreen({ navigation }) {
 
                  {/* File upload pickers (optional) */}
                  <View style={styles.uploadGroup}>
-                   <Text style={styles.uploadLabel}>ID Proof File (optional, max 2 MB)</Text>
-                   <View style={styles.uploadButtonsRow}>
-                     <TouchableOpacity style={styles.uploadBtn} onPress={() => pickFromCamera(setIdProofAsset)}>
-                       <Ionicons name="camera" size={16} color="#fff" />
-                       <Text style={styles.uploadBtnText}>Camera</Text>
-                     </TouchableOpacity>
-                     <TouchableOpacity style={styles.uploadBtn} onPress={() => pickFromGallery(setIdProofAsset)}>
-                       <Ionicons name="image" size={16} color="#fff" />
-                       <Text style={styles.uploadBtnText}>Gallery</Text>
-                     </TouchableOpacity>
-                     <TouchableOpacity style={styles.uploadBtn} onPress={() => pickFromFiles(setIdProofAsset)}>
-                       <Ionicons name="document" size={16} color="#fff" />
-                       <Text style={styles.uploadBtnText}>Files</Text>
-                     </TouchableOpacity>
-                   </View>
+                   <Text style={styles.uploadLabel}>ID Proof Image (JPG/PNG, optional, max 2 MB)</Text>
+                   <TouchableOpacity style={styles.uploadBtn} onPress={pickIdProofImage}>
+                     <Ionicons name="image" size={16} color="#fff" />
+                     <Text style={styles.uploadBtnText}>Choose Image</Text>
+                   </TouchableOpacity>
                    {!!idProofAsset && (
                      <Text style={styles.fileMeta}>Selected: {idProofAsset.name} {(idProofAsset.size/1024).toFixed(0)} KB</Text>
                    )}
@@ -540,27 +604,17 @@ export default function EditProfileScreen({ navigation }) {
 
                  <View style={styles.uploadGroup}>
                    <Text style={styles.uploadLabel}>Address Proof File (optional, max 2 MB)</Text>
-                   <View style={styles.uploadButtonsRow}>
-                     <TouchableOpacity style={styles.uploadBtn} onPress={() => pickFromCamera(setAddressProofAsset)}>
-                       <Ionicons name="camera" size={16} color="#fff" />
-                       <Text style={styles.uploadBtnText}>Camera</Text>
-                     </TouchableOpacity>
-                     <TouchableOpacity style={styles.uploadBtn} onPress={() => pickFromGallery(setAddressProofAsset)}>
-                       <Ionicons name="image" size={16} color="#fff" />
-                       <Text style={styles.uploadBtnText}>Gallery</Text>
-                     </TouchableOpacity>
-                     <TouchableOpacity style={styles.uploadBtn} onPress={() => pickFromFiles(setAddressProofAsset)}>
-                       <Ionicons name="document" size={16} color="#fff" />
-                       <Text style={styles.uploadBtnText}>Files</Text>
-                     </TouchableOpacity>
-                   </View>
+                   <TouchableOpacity style={styles.uploadBtn} onPress={pickAddressProofImage}>
+                     <Ionicons name="image" size={16} color="#fff" />
+                     <Text style={styles.uploadBtnText}>Choose Image</Text>
+                   </TouchableOpacity>
                    {!!addressProofAsset && (
                      <Text style={styles.fileMeta}>Selected: {addressProofAsset.name} {(addressProofAsset.size/1024).toFixed(0)} KB</Text>
                    )}
                  </View>
 
                  {/* Upload KYC button */}
-                 <TouchableOpacity style={[styles.kycUploadBtn, isUploadingKyc && styles.saveButtonDisabled]} onPress={handleUploadKyc} disabled={isUploadingKyc}>
+                 <TouchableOpacity style={[styles.kycUploadBtn, (isUploadingKyc || !canUploadKyc) && styles.saveButtonDisabled]} onPress={handleUploadKyc} disabled={isUploadingKyc || !canUploadKyc}>
                    <Text style={styles.kycUploadBtnText}>{isUploadingKyc ? 'Uploading…' : 'Upload KYC details'}</Text>
                  </TouchableOpacity>
               </View>
