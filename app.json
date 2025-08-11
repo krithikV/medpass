@@ -6,7 +6,7 @@
     "orientation": "portrait",
     "icon": "./assets/med-icon.png",
     "userInterfaceStyle": "light",
-    "newArchEnabled": true,
+    "newArchEnabled": false,
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
@@ -16,7 +16,8 @@
       "supportsTablet": true,
       "infoPlist": {
         "NSLocationWhenInUseUsageDescription": "This app needs access to location to provide location-based services."
-      }
+      },
+      "bundleIdentifier": "com.mediimpact.medpass"
     },
     "android": {
       "adaptiveIcon": {

@@ -62,6 +62,16 @@ export const images = {
   arrow2: require('./arrow2.svg'),
   ellipse6: require('./ellipse6.svg'),
   logout: require('./logout.svg'),
+  
+  // Navigation icons (converted from PNG to SVG)
+  menuIcon: require('./menu-icon.svg'),
+  menuNavIcon: require('./menu-nav-icon.svg'),
+  userNavIcon: require('./user-nav-icon.svg'),
+  phoneIcon: require('./phone-icon.svg'),
+  homeNavIcon: require('./home-nav-icon.svg'),
+  consultIcon: require('./consult-icon.svg'),
+  notificationIcon: require('./notification-icon.svg'),
+  searchIcon: require('./search-icon.svg'),
 
   // Clinic screen (node 112-4067) assets
   clinicImage19: require('./clinic/image19.png'),
