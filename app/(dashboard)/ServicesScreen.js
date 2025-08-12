@@ -63,99 +63,63 @@ export default function ServicesScreen({ navigation, route }) {
         breadcrumb: 'Home > Lab',
         sectionTitle: 'Labs',
         placeholder: 'Search labs...',
-        data: [
-          { id: 1, name: 'Dr. Lal PathLabs', category: 'Diagnostic', rating: '4.7 Stars', distance: '0.9 km', phone: '9876543216', waitTime: '25 mins', image: images.clinicImage19, isOpen: true },
-          { id: 2, name: 'SRL Diagnostics', category: 'Pathology', rating: '4.8 Stars', distance: '1.5 km', phone: '9876543217', waitTime: '35 mins', image: images.clinicImage20, isOpen: true },
-          { id: 3, name: 'Thyrocare', category: 'Specialty', rating: '4.6 Stars', distance: '2.0 km', phone: '9876543218', waitTime: null, image: images.clinicImage21, isOpen: true },
-        ],
+        data: [],
       },
       2: {
         title: 'Hospital',
         breadcrumb: 'Home > Hospital',
         sectionTitle: 'Hospitals',
         placeholder: 'Search hospitals...',
-        data: [
-          { id: 1, name: 'Apollo Hospital', category: 'Multi-Specialty', rating: '4.9 Stars', distance: '2.1 km', phone: '9876543213', waitTime: '45 mins', image: images.clinicImage19, isOpen: true },
-          { id: 2, name: 'Fortis Hospital', category: 'Cardiology', rating: '4.8 Stars', distance: '3.2 km', phone: '9876543214', waitTime: '30 mins', image: images.clinicImage20, isOpen: true },
-          { id: 3, name: 'Manipal Hospital', category: 'Neurology', rating: '4.9 Stars', distance: '1.8 km', phone: '9876543215', waitTime: null, image: images.clinicImage21, isOpen: true },
-        ],
+        data: [],
       },
       3: {
         title: 'Clinic',
         breadcrumb: 'Home > Clinic',
         sectionTitle: 'Clinics',
         placeholder: 'Search clinics...',
-        data: [
-          { id: 1, name: 'Hari Laser Clinic', category: 'Orthopedic', rating: '5 Stars', distance: '0.8 km', phone: '9273540280', waitTime: null, image: images.clinicImage19, isOpen: true },
-          { id: 2, name: 'Manipal Clinics - Begur', category: 'Neurology', rating: '5 Stars', distance: '1.2 km', phone: '9273540280', waitTime: '24 mins', image: images.clinicImage20, isOpen: true },
-          { id: 3, name: 'Cauvery Heart and Multi Speciality', category: 'Cardiology', rating: '5 Stars', distance: '1.5 km', phone: 'vadi@gmail.com', waitTime: null, image: images.clinicImage21, isOpen: true },
-        ],
+        data: [],
       },
       4: {
         title: 'Pharmacy',
         breadcrumb: 'Home > Pharmacy',
         sectionTitle: 'Pharmacies',
         placeholder: 'Search pharmacies...',
-        data: [
-          { id: 1, name: 'MedPlus Pharmacy', category: 'General', rating: '4.8 Stars', distance: '0.5 km', phone: '9876543210', waitTime: '15 mins', image: images.clinicImage19, isOpen: true },
-          { id: 2, name: 'HealthCare Pharmacy', category: 'Specialty', rating: '4.9 Stars', distance: '1.0 km', phone: '9876543211', waitTime: null, image: images.clinicImage20, isOpen: true },
-          { id: 3, name: 'City Pharmacy', category: 'General', rating: '4.7 Stars', distance: '1.3 km', phone: '9876543212', waitTime: '20 mins', image: images.clinicImage21, isOpen: true },
-        ],
+        data: [],
       },
       5: {
         title: 'Homecare Services',
         breadcrumb: 'Home > Homecare Services',
         sectionTitle: 'Homecare Providers',
         placeholder: 'Search homecare services...',
-        data: [
-          { id: 1, name: 'Portea Medical', category: 'Home Healthcare', rating: '4.8 Stars', distance: '1.2 km', phone: '9876543220', waitTime: '30 mins', image: images.clinicImage19, isOpen: true },
-          { id: 2, name: 'HealthCare at Home', category: 'Nursing Care', rating: '4.9 Stars', distance: '2.0 km', phone: '9876543221', waitTime: null, image: images.clinicImage20, isOpen: true },
-          { id: 3, name: 'MediBuddy Home Care', category: 'Physiotherapy', rating: '4.7 Stars', distance: '1.8 km', phone: '9876543222', waitTime: '45 mins', image: images.clinicImage21, isOpen: true },
-        ],
+        data: [],
       },
       6: {
         title: 'Ambulance Services',
         breadcrumb: 'Home > Ambulance Services',
         sectionTitle: 'Ambulance Services',
         placeholder: 'Search ambulance services...',
-        data: [
-          { id: 1, name: '108 Ambulance', category: 'Emergency', rating: '4.9 Stars', distance: '0.5 km', phone: '108', waitTime: '5 mins', image: images.clinicImage19, isOpen: true },
-          { id: 2, name: 'Ziqitza Healthcare', category: 'Medical Transport', rating: '4.8 Stars', distance: '1.0 km', phone: '9876543230', waitTime: '10 mins', image: images.clinicImage20, isOpen: true },
-          { id: 3, name: 'GVK EMRI', category: 'Emergency Response', rating: '4.9 Stars', distance: '1.5 km', phone: '9876543231', waitTime: '8 mins', image: images.clinicImage21, isOpen: true },
-        ],
+        data: [],
       },
       7: {
         title: 'Medical Devices',
         breadcrumb: 'Home > Medical Devices',
         sectionTitle: 'Medical Device Stores',
         placeholder: 'Search medical devices...',
-        data: [
-          { id: 1, name: 'MedPlus Medical Devices', category: 'Equipment', rating: '4.7 Stars', distance: '1.0 km', phone: '9876543240', waitTime: null, image: images.clinicImage19, isOpen: true },
-          { id: 2, name: 'HealthCare Equipment', category: 'Devices', rating: '4.8 Stars', distance: '1.5 km', phone: '9876543241', waitTime: '20 mins', image: images.clinicImage20, isOpen: true },
-          { id: 3, name: 'Medical Supply Store', category: 'Supplies', rating: '4.6 Stars', distance: '2.0 km', phone: '9876543242', waitTime: null, image: images.clinicImage21, isOpen: true },
-        ],
+        data: [],
       },
       8: {
         title: 'Doctor to Door',
         breadcrumb: 'Home > Doctor to Door',
         sectionTitle: 'Doctor to Door',
         placeholder: 'Search doctor to door...',
-        data: [
-          { id: 1, name: 'Practo Consult', category: 'Telemedicine', rating: '4.8 Stars', distance: '0.0 km', phone: '9876543250', waitTime: '15 mins', image: images.clinicImage19, isOpen: true },
-          { id: 2, name: '1mg Doctor', category: 'Online Consultation', rating: '4.9 Stars', distance: '0.0 km', phone: '9876543251', waitTime: '10 mins', image: images.clinicImage20, isOpen: true },
-          { id: 3, name: 'MediBuddy', category: 'Virtual Care', rating: '4.7 Stars', distance: '0.0 km', phone: '9876543252', waitTime: '20 mins', image: images.clinicImage21, isOpen: true },
-        ],
+        data: [],
       },
       9: {
         title: 'IVF',
         breadcrumb: 'Home > IVF',
         sectionTitle: 'IVF Centers',
         placeholder: 'Search IVF centers...',
-        data: [
-          { id: 1, name: 'Nova IVF Fertility', category: 'Fertility', rating: '4.9 Stars', distance: '2.5 km', phone: '9876543260', waitTime: '60 mins', image: images.clinicImage19, isOpen: true },
-          { id: 2, name: 'Indira IVF', category: 'Reproductive Medicine', rating: '4.8 Stars', distance: '3.0 km', phone: '9876543261', waitTime: '45 mins', image: images.clinicImage20, isOpen: true },
-          { id: 3, name: 'Srishti IVF', category: 'Fertility Clinic', rating: '4.7 Stars', distance: '2.8 km', phone: '9876543262', waitTime: '50 mins', image: images.clinicImage21, isOpen: true },
-        ],
+        data: [],
       },
     };
     return configsById[serviceId] || configsById[3];
@@ -208,7 +172,7 @@ export default function ServicesScreen({ navigation, route }) {
 
   // Initialize filteredData when merchants change or component loads
   useEffect(() => {
-    const baseData = (merchants && merchants.length > 0) ? merchants : serviceConfig.data;
+    const baseData = Array.isArray(merchants) ? merchants : [];
     const mappedData = baseData.map((m) => ({
       id: m.id,
       name: m.provider_display_name || m.name,
@@ -231,7 +195,7 @@ export default function ServicesScreen({ navigation, route }) {
   useEffect(() => {
     if (!searchQuery.trim()) {
       // Reset to show all data when search is cleared
-      const baseData = (merchants && merchants.length > 0) ? merchants : serviceConfig.data;
+      const baseData = Array.isArray(merchants) ? merchants : [];
       const mappedData = baseData.map((m) => ({
         id: m.id,
         name: m.provider_display_name || m.name,
@@ -253,7 +217,7 @@ export default function ServicesScreen({ navigation, route }) {
 
     // Filter existing mapped data
     const query = searchQuery.toLowerCase().trim();
-    const currentData = (merchants && merchants.length > 0) ? merchants : serviceConfig.data;
+    const currentData = Array.isArray(merchants) ? merchants : [];
     const mappedData = currentData.map((m) => ({
       id: m.id,
       name: m.provider_display_name || m.name,
@@ -268,18 +232,22 @@ export default function ServicesScreen({ navigation, route }) {
       logoFileName: m.logo || null,
       kmsRaw: typeof m.kms === 'number' ? m.kms : (m.kms ? Number(m.kms) : null),
       maxDiscount: m.max_discount ? Number(m.max_discount) : null,
-    }));
-
-    const filtered = mappedData.filter((item) => {
-      const name = (item.name || '').toLowerCase();
-      const address = (item.address || '').toLowerCase();
-      const phone = (item.phone || '').toLowerCase();
-      
-      return name.includes(query) || address.includes(query) || phone.includes(query);
+    }))
+    .filter((m) => {
+      const nameMatch = (m.name || '').toLowerCase().includes(query);
+      const categoryMatch = (m.category || '').toLowerCase().includes(query);
+      const addressMatch = (m.address || '').toLowerCase().includes(query);
+      const phoneMatch = (m.phone || '').toLowerCase().includes(query);
+      return nameMatch || categoryMatch || addressMatch || phoneMatch;
+    })
+    .sort((a, b) => {
+      const aKms = typeof a.kmsRaw === 'number' ? a.kmsRaw : Number.MAX_SAFE_INTEGER;
+      const bKms = typeof b.kmsRaw === 'number' ? b.kmsRaw : Number.MAX_SAFE_INTEGER;
+      return aKms - bKms;
     });
-    
-    setFilteredData(filtered);
-  }, [searchQuery, merchants, serviceConfig]); // serviceConfig is now a stable dependency
+
+    setFilteredData(mappedData);
+  }, [searchQuery, merchants, serviceConfig]);
 
   const openMaps = (item) => {
     const label = encodeURIComponent(item.name || 'Destination');
@@ -491,18 +459,28 @@ export default function ServicesScreen({ navigation, route }) {
             data={filteredData}
             keyExtractor={(item) => String(item.id)}
             renderItem={renderItem}
-            contentContainerStyle={{ paddingBottom: 24 }}
+            contentContainerStyle={{ paddingBottom: 24, flexGrow: 1 }}
             showsVerticalScrollIndicator={false}
+            ListEmptyComponent={() => {
+              const hasMerchants = Array.isArray(merchants) && merchants.length > 0;
+              const showSearchEmpty = hasMerchants && searchQuery.trim();
+              return (
+                <View style={{ paddingVertical: 40, alignItems: 'center', flex: 1, justifyContent: 'center' }}>
+                  <Text style={{ color: '#666', fontSize: 16 }}>
+                    {hasMerchants
+                      ? (showSearchEmpty ? `No results found for "${searchQuery}"` : 'No results')
+                      : 'No services available'}
+                  </Text>
+                  {showSearchEmpty ? (
+                    <Text style={{ color: '#999', fontSize: 14, marginTop: 8 }}>Try adjusting your search terms</Text>
+                  ) : null}
+                </View>
+              );
+            }}
           />
         )}
         {!!errorMessage && (
           <Text style={{ color: 'red', textAlign: 'center', marginTop: 8 }}>{errorMessage}</Text>
-        )}
-        {!isLoading && filteredData && filteredData.length === 0 && searchQuery.trim() && (
-          <View style={{ paddingVertical: 40, alignItems: 'center' }}>
-            <Text style={{ color: '#666', fontSize: 16 }}>No results found for "{searchQuery}"</Text>
-            <Text style={{ color: '#999', fontSize: 14, marginTop: 8 }}>Try adjusting your search terms</Text>
-          </View>
         )}
       </View>
       {/* Bottom Navigation */}
