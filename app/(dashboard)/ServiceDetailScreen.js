@@ -61,7 +61,7 @@ export default function ServiceDetailScreen({ navigation, route }) {
     if (!serviceId) return;
     try {
       setErrorMessage('');
-      const url = `http://api.mediimpact.in/index.php/user/get_services/${serviceId}`;
+      const url = `https://api.mediimpact.in/index.php/user/get_services/${serviceId}`;
       const resp = await fetch(url);
       if (!resp.ok) {
         throw new Error(`Request failed: ${resp.status}`);
@@ -111,14 +111,14 @@ export default function ServiceDetailScreen({ navigation, route }) {
     
     if (addressData.latitude && addressData.longitude) {
       url = Platform.select({
-        ios: `http://maps.apple.com/?q=${label}&ll=${addressData.latitude},${addressData.longitude}`,
+        ios: `https://maps.apple.com/?q=${label}&ll=${addressData.latitude},${addressData.longitude}`,
         android: `geo:0,0?q=${addressData.latitude},${addressData.longitude}(${label})`,
         default: url,
       });
     } else {
       const query = encodeURIComponent(`${addressData.provider_name || ''} ${addressData.address || ''}`.trim());
       url = Platform.select({
-        ios: `http://maps.apple.com/?q=${query}`,
+        ios: `https://maps.apple.com/?q=${query}`,
         android: `geo:0,0?q=${query}`,
         default: `https://www.google.com/maps/search/?api=1&query=${query}`,
       });

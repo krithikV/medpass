@@ -113,14 +113,14 @@ export default function MerchantDetailScreen({ navigation, route }) {
     )}`;
     if (merchant.latitude && merchant.longitude) {
       url = Platform.select({
-        ios: `http://maps.apple.com/?q=${label}&ll=${merchant.latitude},${merchant.longitude}`,
+        ios: `https://maps.apple.com/?q=${label}&ll=${merchant.latitude},${merchant.longitude}`,
         android: `geo:0,0?q=${merchant.latitude},${merchant.longitude}(${label})`,
         default: url,
       });
     } else {
       const query = encodeURIComponent(`${merchant.provider_display_name || ''} ${merchant.address || ''}`.trim());
       url = Platform.select({
-        ios: `http://maps.apple.com/?q=${query}`,
+        ios: `https://maps.apple.com/?q=${query}`,
         android: `geo:0,0?q=${query}`,
         default: `https://www.google.com/maps/search/?api=1&query=${query}`,
       });

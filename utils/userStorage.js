@@ -197,7 +197,7 @@ export const fetchWalletStatus = async () => {
     const body = new URLSearchParams();
     body.append('mobile', mobile);
 
-    const resp = await fetch('http://api.mediimpact.in/index.php/Wallet/MobileValidate', {
+    const resp = await fetch('https://api.mediimpact.in/index.php/Wallet/MobileValidate', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',

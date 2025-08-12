@@ -261,7 +261,7 @@ export default function ServicesScreen({ navigation, route }) {
     if (hasCoords) {
       const latLng = `${item.latitude},${item.longitude}`;
       const url = Platform.select({
-        ios: `http://maps.apple.com/?q=${label}&ll=${latLng}`,
+        ios: `https://maps.apple.com/?q=${label}&ll=${latLng}`,
         android: `geo:0,0?q=${latLng}(${label})`,
         default: `https://www.google.com/maps/search/?api=1&query=${latLng}`,
       });
@@ -271,7 +271,7 @@ export default function ServicesScreen({ navigation, route }) {
     } else {
       const query = encodeURIComponent(`${item.name || ''} ${item.address || ''}`.trim());
       const url = Platform.select({
-        ios: `http://maps.apple.com/?q=${query}`,
+        ios: `https://maps.apple.com/?q=${query}`,
         android: `geo:0,0?q=${query}`,
         default: `https://www.google.com/maps/search/?api=1&query=${query}`,
       });

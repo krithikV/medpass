@@ -70,7 +70,7 @@ export default function AllServicesScreen({ navigation }) {
           latitude = 11.587825;
           longitude = 76.026344;
         }
-        const url = `http://api.mediimpact.in/index.php/user/get_merchants?lat=${latitude}&lng=${longitude}`;
+        const url = `https://api.mediimpact.in/index.php/user/get_merchants?lat=${latitude}&lng=${longitude}`;
         const res = await fetch(url);
         if (!res.ok) throw new Error(`Request failed: ${res.status}`);
         const json = await res.json();
@@ -151,7 +151,7 @@ export default function AllServicesScreen({ navigation }) {
     if (hasCoords) {
       const latLng = `${item.latitude},${item.longitude}`;
       const url = Platform.select({
-        ios: `http://maps.apple.com/?q=${label}&ll=${latLng}`,
+        ios: `https://maps.apple.com/?q=${label}&ll=${latLng}`,
         android: `geo:0,0?q=${latLng}(${label})`,
         default: `https://www.google.com/maps/search/?api=1&query=${latLng}`,
       });
@@ -159,7 +159,7 @@ export default function AllServicesScreen({ navigation }) {
     } else {
       const query = encodeURIComponent(`${item.name || ''} ${item.address || ''}`.trim());
       const url = Platform.select({
-        ios: `http://maps.apple.com/?q=${query}`,
+        ios: `https://maps.apple.com/?q=${query}`,
         android: `geo:0,0?q=${query}`,
         default: `https://www.google.com/maps/search/?api=1&query=${query}`,
       });
