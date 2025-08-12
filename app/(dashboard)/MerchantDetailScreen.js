@@ -14,6 +14,7 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import images from '../../assets/images';
 import BottomNavigation from '../../components/BottomNavigation';
 
@@ -38,6 +39,7 @@ export default function MerchantDetailScreen({ navigation, route }) {
   const [errorMessage, setErrorMessage] = useState('');
   const [merchant, setMerchant] = useState(null);
   const [services, setServices] = useState([]);
+  const [website, setWebsite] = useState('');
   // Always use the same base URL as Services list
   const [logoBase] = useState('https://mediimpact.in/assets/img/logo/');
 
@@ -72,6 +74,8 @@ export default function MerchantDetailScreen({ navigation, route }) {
       }
       setMerchant(json.merchant_data);
       setServices(Array.isArray(json.service_data) ? json.service_data : []);
+      const apiWebsite = json?.merchant_data?.merchant_website || json?.merchant_data?.website || '';
+      if (apiWebsite) setWebsite(apiWebsite);
     } catch (e) {
       setErrorMessage(e.message || 'Unable to load details');
       setMerchant(null);
@@ -82,6 +86,7 @@ export default function MerchantDetailScreen({ navigation, route }) {
   }, [merchantId]);
 
   useEffect(() => {
+    if (prefill?.website) setWebsite(prefill.website);
     fetchDetails();
   }, [fetchDetails]);
 
@@ -123,11 +128,95 @@ export default function MerchantDetailScreen({ navigation, route }) {
     Linking.openURL(url).catch(() => {});
   };
 
+  const openWebsite = () => {
+    if (!website) return;
+    let url = String(website).trim();
+    if (!/^https?:\/\//i.test(url)) {
+      url = `https://${url}`;
+    }
+    Linking.openURL(url).catch(() => {});
+  };
+
+  const openPhoneLink = (phone) => {
+    if (!phone) return;
+    const tel = Platform.select({ ios: `tel://${phone}`, android: `tel:${phone}`, default: `tel:${phone}` });
+    Linking.openURL(tel).catch(() => {});
+  };
+
+  const openEmailLink = (email) => {
+    if (!email) return;
+    Linking.openURL(`mailto:${email}`).catch(() => {});
+  };
+
   const renderChip = (label) => (
     <View style={styles.chip}>
       <Text style={styles.chipText}>{label}</Text>
     </View>
   );
+
+  const getNumericPercent = (s) => {
+    const candidates = [
+      s?.max_discount,
+      s?.discount_percent,
+      s?.discount,
+      s?.cashback,
+      s?.offer_percent,
+      s?.offer,
+    ];
+    for (const val of candidates) {
+      if (val == null) continue;
+      const num = Number(String(val).replace(/[^0-9.\-]/g, ''));
+      if (!Number.isNaN(num) && Number.isFinite(num) && num > 0) return Math.round(num);
+    }
+    return null;
+  };
+
+  const getServiceImage = (s) => {
+    const url = s?.image_url || s?.image || s?.icon || null;
+    if (typeof url === 'string' && url.length > 4) {
+      return { uri: url };
+    }
+    return images.clinicImage20;
+  };
+
+  const renderServiceCard = (service, index) => {
+    const percent = getNumericPercent(service);
+    const fallbackTitle = service?.main_service_name || service?.service_name || 'Service';
+    const title = percent ? `${percent}% cash back on all services` : fallbackTitle;
+    const hasHomeCollection = service?.homecollection === '1';
+    return (
+      <LinearGradient
+        key={`${service?.serviceid || index}`}
+        colors={index % 2 === 0 ? ['#E9FAFF', '#D7F2FF'] : ['#E4ECFF', '#D5E3FF']}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={styles.serviceCard}
+      >
+        <View style={styles.serviceCardContent}>
+          <View>
+            <Text style={styles.serviceTitle} numberOfLines={2}>{title}</Text>
+            {/* Subtitle removed per requirement */}
+            {hasHomeCollection ? (
+              <View style={[styles.chip, { alignSelf: 'flex-start', marginTop: 8 }]}>
+                <Text style={styles.chipText}>Home Collection</Text>
+              </View>
+            ) : null}
+          </View>
+          <TouchableOpacity
+            style={styles.serviceViewMoreBtn}
+            activeOpacity={0.85}
+            onPress={() => navigation.navigate('ServiceDetailScreen', {
+              serviceId: service?.serviceid || serviceId,
+              serviceName: title,
+              merchantData: merchant || prefill,
+            })}
+          >
+            <Text style={styles.serviceViewMoreText}>View more</Text>
+          </TouchableOpacity>
+        </View>
+      </LinearGradient>
+    );
+  };
 
   return (
     <View style={{ flex: 1, backgroundColor: COLORS.primary100 }}>
@@ -185,6 +274,31 @@ export default function MerchantDetailScreen({ navigation, route }) {
               <Text style={styles.subText}>
                 {((merchant?.city_name || '').trim() || '')} {merchant?.state_name ? `, ${merchant.state_name}` : ''}
               </Text>
+              {!!website && (
+                <TouchableOpacity onPress={openWebsite}>
+                  <Text style={styles.websiteLink} numberOfLines={1}>
+                    {String(website).replace(/^https?:\/\//i, '')}
+                  </Text>
+                </TouchableOpacity>
+              )}
+              {/* Phone below website as clickable link */}
+              {(() => {
+                const phone = merchant?.phone_no || merchant?.merchant_mobile || prefill?.phone || '';
+                return phone ? (
+                  <TouchableOpacity onPress={() => openPhoneLink(phone)}>
+                    <Text style={styles.contactLink} numberOfLines={1}>{phone}</Text>
+                  </TouchableOpacity>
+                ) : null;
+              })()}
+              {/* Email clickable link */}
+              {(() => {
+                const email = merchant?.merchant_email || prefill?.merchant_email || prefill?.email || '';
+                return email ? (
+                  <TouchableOpacity onPress={() => openEmailLink(email)}>
+                    <Text style={styles.contactLink} numberOfLines={1}>{email}</Text>
+                  </TouchableOpacity>
+                ) : null;
+              })()}
 
               {/* Meta chips row (distance, discount/category) */}
               <View style={[styles.chipsRow, { marginTop: 12 }] }>
@@ -194,48 +308,24 @@ export default function MerchantDetailScreen({ navigation, route }) {
               </View>
 
                   <View style={styles.actionsRow}>
-                    <TouchableOpacity style={styles.actionBtn} onPress={() => handleCall(merchant?.phone_no || merchant?.merchant_mobile)}>
-                      <Ionicons name="call" size={16} color={COLORS.white} />
-                      <Text style={styles.actionText}>Call</Text>
-                    </TouchableOpacity>
                     <TouchableOpacity style={styles.actionBtn} onPress={openMaps}>
                       <Ionicons name="map" size={16} color={COLORS.white} />
                       <Text style={styles.actionText}>Maps</Text>
-                    </TouchableOpacity>
-                    {merchant?.merchant_email ? (
-                      <TouchableOpacity
-                        style={styles.actionBtn}
-                        onPress={() => Linking.openURL(`mailto:${merchant.merchant_email}`).catch(() => {})}
-                      >
-                        <Ionicons name="mail" size={16} color={COLORS.white} />
-                        <Text style={styles.actionText}>Email</Text>
-                      </TouchableOpacity>
-                    ) : null}
-                    <TouchableOpacity
-                      style={styles.actionBtn}
-                      onPress={() => navigation.navigate('PaymentScreen', {
-                        serviceName: merchant?.provider_display_name || prefill?.name || 'Service',
-                        serviceId: merchantId || prefill?.id,
-                      })}
-                    >
-                      <Ionicons name="card" size={16} color={COLORS.white} />
-                      <Text style={styles.actionText}>Pay</Text>
                     </TouchableOpacity>
                   </View>
                 </View>
 
                 {services && services.length > 0 && (
-                  <View style={styles.card}>
-                    <Text style={styles.sectionTitle}>Services</Text>
-                    <View style={styles.chipsRow}>
-                      {services.map((s, idx) => (
-                        <React.Fragment key={`${s.serviceid || idx}`}>
-                          {renderChip(s.main_service_name)}
-                          {s.homecollection === '1' ? renderChip('Home Collection') : null}
-                        </React.Fragment>
-                      ))}
-                    </View>
-                  </View>
+                  <>
+                    <Text style={[styles.sectionTitle, { marginTop: 12, marginBottom: 8 }]}>Services</Text>
+                    <ScrollView
+                      horizontal
+                      showsHorizontalScrollIndicator={false}
+                      contentContainerStyle={styles.servicesScroll}
+                    >
+                      {services.map((s, idx) => renderServiceCard(s, idx))}
+                    </ScrollView>
+                  </>
                 )}
 
                 {!!merchant?.notes && (
@@ -402,6 +492,10 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     gap: 8,
   },
+  servicesScroll: {
+    paddingVertical: 4,
+    paddingRight: 4,
+  },
   chip: {
     backgroundColor: COLORS.primary100,
     borderRadius: 10,
@@ -414,6 +508,59 @@ const styles = StyleSheet.create({
     color: '#0065fb',
     fontSize: 12,
   },
+  websiteLink: {
+    marginTop: 8,
+    color: '#0A4C9A',
+    fontSize: 13,
+    textDecorationLine: 'underline',
+  },
+  contactLink: {
+    marginTop: 6,
+    color: '#0A4C9A',
+    fontSize: 13,
+    textDecorationLine: 'underline',
+  },
+  serviceCard: {
+    width: 280,
+    height: 156,
+    borderRadius: 16,
+    padding: 16,
+    marginRight: 12,
+    overflow: 'hidden',
+    flexDirection: 'column',
+    alignItems: 'stretch',
+  },
+  serviceCardContent: {
+    flex: 1,
+    justifyContent: 'space-between',
+  },
+  serviceTitle: {
+    color: '#0E4B8E',
+    fontSize: 18,
+    fontWeight: '800',
+  },
+  serviceSubtitle: {
+    marginTop: 8,
+    color: '#0E4B8E',
+    opacity: 0.85,
+    fontSize: 14,
+  },
+  serviceApplyBtn: { display: 'none' },
+  serviceApplyText: { display: 'none' },
+  serviceViewMoreBtn: {
+    backgroundColor: '#0A4C9A',
+    borderRadius: 20,
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    alignSelf: 'flex-start',
+    marginTop: 14,
+  },
+  serviceViewMoreText: {
+    color: '#fff',
+    fontWeight: '700',
+    fontSize: 13,
+  },
+  // serviceImage removed as per requirement
   payBtn: {
     flexDirection: 'row',
     alignItems: 'center',

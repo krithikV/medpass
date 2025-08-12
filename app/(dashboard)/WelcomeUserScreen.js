@@ -11,7 +11,7 @@ export default function WelcomeUserScreen({ navigation, route }) {
   useEffect(() => {
     // Auto redirect to HomeScreen after 3 seconds
     const timer = setTimeout(() => {
-      navigation.navigate('HomeScreen');
+      navigation.replace('HomeScreen');
     }, 3000);
 
     return () => clearTimeout(timer);

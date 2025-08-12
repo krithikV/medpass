@@ -20,6 +20,8 @@ export default function PaymentScreen({ navigation, route }) {
   const insets = useSafeAreaInsets();
   const [userData, setUserData] = useState(null);
   const [amount, setAmount] = useState('');
+  const [prn, setPrn] = useState('');
+  const [comments, setComments] = useState('');
   const amountInputRef = useRef(null);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -28,6 +30,14 @@ export default function PaymentScreen({ navigation, route }) {
 
   useEffect(() => {
     (async () => {
+      try {
+        const { needsFirstName } = require('../../utils/userStorage');
+        const shouldRedirect = await needsFirstName();
+        if (shouldRedirect) {
+          navigation.replace('WalletScreen');
+          return;
+        }
+      } catch (_) {}
       const data = await getUserData();
       setUserData(data);
     })();
@@ -70,9 +80,9 @@ export default function PaymentScreen({ navigation, route }) {
       const body = new URLSearchParams();
       body.append('service_id', String(serviceId));
       body.append('amount', String(numeric));
-      body.append('prn', '');
+      body.append('prn', prn ? String(prn) : '');
       body.append('ba_code', '');
-      body.append('desc', 'Consultation payment');
+      body.append('desc', comments ? String(comments) : '');
       body.append('partycode', '');
 
       const resp = await fetch('https://api.mediimpact.in/index.php/Wallet/makeTransaction', {
@@ -140,6 +150,26 @@ export default function PaymentScreen({ navigation, route }) {
                 returnKeyType="done"
                 textAlign="center"
                 autoFocus
+              />
+            </View>
+
+            {/* Optional PRN and Comments */}
+            <View style={styles.optionalRow}>
+              <TextInput
+                style={styles.smallInput}
+                placeholder="PRN (optional)"
+                placeholderTextColor="#99A"
+                value={prn}
+                onChangeText={setPrn}
+                returnKeyType="next"
+              />
+              <TextInput
+                style={[styles.smallInput, { marginLeft: 8 }]}
+                placeholder="Comments (optional)"
+                placeholderTextColor="#99A"
+                value={comments}
+                onChangeText={setComments}
+                returnKeyType="done"
               />
             </View>
 
@@ -295,5 +325,23 @@ const styles = StyleSheet.create({
     fontFamily: 'Satoshi Variable',
     fontWeight: '700',
     fontSize: 16,
+  },
+  optionalRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 10,
+    paddingHorizontal: 16,
+  },
+  smallInput: {
+    flex: 1,
+    height: 40,
+    borderWidth: 1,
+    borderColor: '#E3EEFF',
+    borderRadius: 10,
+    paddingHorizontal: 10,
+    fontFamily: 'Satoshi Variable',
+    fontSize: 13,
+    color: COLORS.primary1000,
+    backgroundColor: COLORS.white,
   },
 });

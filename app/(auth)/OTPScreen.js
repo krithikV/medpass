@@ -132,9 +132,11 @@ export default function OTPScreen({ navigation, route }) {
         // Success - store user data and navigate directly (no success dialog)
         const storageSuccess = await storeUserData(data, phoneNumber);
         if (storageSuccess) {
-          navigation.navigate('WelcomeUserScreen', { 
-            userName: data.name,
-            userId: data.userId
+          navigation.reset({
+            index: 0,
+            routes: [
+              { name: 'HomeScreen' },
+            ],
           });
         } else {
           Alert.alert('Storage Error', 'Login successful but failed to save user data. Please try again.');

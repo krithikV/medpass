@@ -22,7 +22,9 @@ import AddMoneyScreen from '../app/(dashboard)/AddMoneyScreen';
 import MerchantDetailScreen from '../app/(dashboard)/MerchantDetailScreen';
 import PaymentScreen from '../app/(dashboard)/PaymentScreen';
 import TxnSuccessScreen from '../app/(dashboard)/TxnSuccessScreen';
+import ServiceDetailScreen from '../app/(dashboard)/ServiceDetailScreen';
 import PinVerifyScreen from '../app/(dashboard)/PinVerifyScreen';
+import AllServicesScreen from '../app/(dashboard)/AllServicesScreen';
 
 const Stack = createStackNavigator();
 
@@ -80,6 +82,7 @@ export default function AppNavigator() {
         <Stack.Screen name="WelcomeUserScreen" component={WelcomeUserScreen} options={{ gestureEnabled: false, animationEnabled: false }} />
         <Stack.Screen name="HomeScreen" component={HomeScreen} options={{ gestureEnabled: false, animationEnabled: false }} />
         <Stack.Screen name="ServicesScreen" component={ServicesScreen} options={{ animationEnabled: false }} />
+        <Stack.Screen name="AllServicesScreen" component={AllServicesScreen} options={{ animationEnabled: false }} />
         <Stack.Screen name="ProfileScreen" component={ProfileScreen} options={{ animationEnabled: false }} />
         <Stack.Screen name="EditProfileScreen" component={EditProfileScreen} options={{ animationEnabled: false }} />
         <Stack.Screen name="WalletScreen" component={WalletScreen} options={{ animationEnabled: false }} />
@@ -87,6 +90,7 @@ export default function AppNavigator() {
         <Stack.Screen name="MerchantDetailScreen" component={MerchantDetailScreen} options={{ animationEnabled: false }} />
         <Stack.Screen name="PaymentScreen" component={PaymentScreen} options={{ animationEnabled: false }} />
         <Stack.Screen name="TxnSuccessScreen" component={TxnSuccessScreen} options={{ animationEnabled: false }} />
+        <Stack.Screen name="ServiceDetailScreen" component={ServiceDetailScreen} options={{ animationEnabled: false }} />
         <Stack.Screen name="PinVerifyScreen" component={PinVerifyScreen} options={{ animationEnabled: false }} />
       </Stack.Navigator>
     </NavigationContainer>

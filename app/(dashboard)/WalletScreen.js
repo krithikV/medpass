@@ -55,7 +55,17 @@ export default function WalletScreen({ navigation }) {
   const inputRefs = useRef([]);
 
   useEffect(() => {
-    loadUserData();
+    (async () => {
+      try {
+        const { needsFirstName } = require('../../utils/userStorage');
+        const shouldRedirect = await needsFirstName();
+        if (shouldRedirect) {
+          navigation.replace('EditProfileScreen');
+          return;
+        }
+      } catch (_) {}
+      loadUserData();
+    })();
   }, []);
 
   const fetchUserInfoCashback = async (creds) => {
@@ -268,9 +278,29 @@ export default function WalletScreen({ navigation }) {
         Alert.alert('Missing credentials', 'Please login again.');
         return;
       }
+
+      // Detailed logging
+      const tStart = Date.now();
+      const maskedToken = (() => {
+        try { const t = String(userData.token); return `${t.slice(0,4)}…${t.slice(-4)}`; } catch { return 'masked'; }
+      })();
+      console.group('Wallet OTP Verification');
+      console.log('When:', new Date(tStart).toISOString());
+      console.log('User-ID:', String(userData.userId));
+      console.log('Token (masked):', maskedToken);
+      console.log('OTP length:', code.length, 'OTP (masked):', `****${code.slice(-1)}`);
+
       setIsVerifying(true);
       const body = new URLSearchParams();
       body.append('otp', code);
+
+      console.log('Request →', {
+        url: 'https://api.mediimpact.in/index.php/Wallet/otp_validation',
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded', token: '[masked]', 'User-ID': String(userData.userId), version: '10007' },
+        body: body.toString(),
+      });
+
       const resp = await fetch('https://api.mediimpact.in/index.php/Wallet/otp_validation', {
         method: 'POST',
         headers: {
@@ -281,23 +311,42 @@ export default function WalletScreen({ navigation }) {
         },
         body: body.toString(),
       });
-      const data = await resp.json().catch(() => ({}));
+
+      const rawText = await resp.text();
+      let data = {};
+      try { data = JSON.parse(rawText); } catch (_) { /* non-JSON or empty */ }
+      console.log('Response status:', resp.status, 'ok:', resp.ok);
+      console.log('Response body (raw):', rawText);
+      console.log('Response body (parsed):', data);
+
       if (!resp.ok || (data?.status && data.status !== 200)) {
+        const elapsedMs = Date.now() - tStart;
+        console.log('Verification outcome: FAILED in', `${elapsedMs}ms`);
+        console.groupEnd();
         throw new Error(data?.message || 'OTP verification failed');
       }
-      // Refresh user data to update wallet status
+
+      // Refresh user data and wallet status (read-only) after success
+      console.log('Refreshing user data from API…');
       const result = await refreshUserDataFromAPI();
+      console.log('refreshUserDataFromAPI:', result);
       if (result?.ok) {
         const updated = await getUserData();
         setUserData(updated);
+        console.log('User data updated in state');
       }
       const walletResp = await fetchWalletStatus();
+      console.log('Wallet status after verification:', walletResp);
       if (walletResp?.ok) {
         setWalletStatusActual(walletResp.walletStatus);
       }
+
+      const elapsedMs = Date.now() - tStart;
+      console.log('Verification outcome: SUCCESS in', `${elapsedMs}ms`);
+      console.groupEnd();
       Alert.alert('Verified', 'Wallet OTP verified successfully.');
     } catch (e) {
-      console.error('verify wallet otp error', e);
+      console.log('Wallet OTP verification error:', e?.message || e);
       Alert.alert('Error', e.message || 'OTP verification failed.');
     } finally {
       setIsVerifying(false);

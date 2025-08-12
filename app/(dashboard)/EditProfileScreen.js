@@ -9,12 +9,13 @@ import {
   StatusBar,
   Image,
   TextInput,
-  Alert
+  Alert,
+  BackHandler
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
-import { getUserData } from '../../utils/userStorage';
+import { getUserData, USER_STORAGE_KEYS } from '../../utils/userStorage';
 import images from '../../assets/images';
 import * as DocumentPicker from 'expo-document-picker';
 import * as ImagePicker from 'expo-image-picker';
@@ -73,6 +74,35 @@ export default function EditProfileScreen({ navigation }) {
   useEffect(() => {
     loadUserData();
   }, []);
+
+  // Handle Android system back to follow the same rule as header back
+  useEffect(() => {
+    const smartBack = async () => {
+      try {
+        const { needsFirstName } = require('../../utils/userStorage');
+        const noName = await needsFirstName();
+        if (noName) {
+          navigation.replace('HomeScreen');
+          return true;
+        }
+        if (navigation.canGoBack()) {
+          navigation.goBack();
+        } else {
+          navigation.replace('ProfileScreen');
+        }
+      } catch (_) {
+        if (navigation.canGoBack()) {
+          navigation.goBack();
+        } else {
+          navigation.replace('HomeScreen');
+        }
+      }
+      return true;
+    };
+    const onBackPress = smartBack;
+    const sub = BackHandler.addEventListener('hardwareBackPress', onBackPress);
+    return () => sub.remove();
+  }, [navigation]);
 
   useEffect(() => {
     const timeout = setTimeout(() => {
@@ -146,6 +176,7 @@ export default function EditProfileScreen({ navigation }) {
 
     setIsSaving(true);
     try {
+      const hadFirstNameBefore = !!String(userData?.userData?.name || userData?.userName || '').trim();
       // Get token and userId from AsyncStorage
       const [token, userId] = await Promise.all([
         AsyncStorage.getItem('userToken'),
@@ -198,8 +229,51 @@ export default function EditProfileScreen({ navigation }) {
 
       if (response.ok && responseData.status === 200) {
         console.log('✅ Profile update successful!');
+        // Persist the newly entered profile fields locally so app state is consistent
+        try {
+          const existing = await AsyncStorage.getItem(USER_STORAGE_KEYS.USER_DATA);
+          const parsed = existing ? JSON.parse(existing) : {};
+          const updatedLocal = {
+            ...parsed,
+            name: formData.firstname || parsed.name || '',
+            middlename: formData.middlename || parsed.middlename || '',
+            lastname: formData.lastname || parsed.lastname || '',
+            mothers_maiden_name: formData.mothers_maiden_name || parsed.mothers_maiden_name || '',
+            dob: formData.dob || parsed.dob || '',
+            email: formData.email || parsed.email || '',
+            mobile: formData.mobile || parsed.mobile || '',
+            state: formData.state || parsed.state || '',
+            city: formData.city || parsed.city || '',
+            address: formData.address || parsed.address || '',
+            pincode: formData.pincode || parsed.pincode || '',
+            id_proof_type: formData.id_proof_type || parsed.id_proof_type || '',
+            id_proof_no: formData.id_proof_no || parsed.id_proof_no || '',
+            add_proof_type: formData.add_proof_type || parsed.add_proof_type || '',
+            add_proof_no: ((formData.add_proof_type === 'AadhaarCard' || formData.add_proof_type === 'Aadhar') && !formData.add_proof_no)
+              ? (parsed.add_proof_no || originalAddProofNo || '')
+              : (formData.add_proof_no || parsed.add_proof_no || ''),
+            gender: formData.gender || parsed.gender || '',
+          };
+          await Promise.all([
+            AsyncStorage.setItem(USER_STORAGE_KEYS.USER_NAME, formData.firstname || ''),
+            AsyncStorage.setItem(USER_STORAGE_KEYS.USER_DATA, JSON.stringify(updatedLocal)),
+          ]);
+        } catch (persistErr) {
+          console.log('Warning: failed to persist updated local profile', persistErr);
+        }
+        const nowHasFirstName = !!String(formData.firstname || '').trim();
         Alert.alert('Success', 'Profile updated successfully!', [
-          { text: 'OK', onPress: () => navigation.goBack() }
+          { text: 'OK', onPress: () => {
+            if (!hadFirstNameBefore && nowHasFirstName) {
+              navigation.replace('ProfileScreen');
+              return;
+            }
+            if (navigation.canGoBack()) {
+              navigation.goBack();
+            } else {
+              navigation.replace('ProfileScreen');
+            }
+          } }
         ]);
       } else {
         console.log('❌ Profile update failed');
@@ -527,7 +601,27 @@ export default function EditProfileScreen({ navigation }) {
           <View style={styles.headerTop}>
             <TouchableOpacity 
               style={styles.backButton}
-              onPress={() => navigation.goBack()}
+              onPress={async () => {
+                try {
+                  const { needsFirstName } = require('../../utils/userStorage');
+                  const noName = await needsFirstName();
+                  if (noName) {
+                    navigation.replace('HomeScreen');
+                    return;
+                  }
+                  if (navigation.canGoBack()) {
+                    navigation.goBack();
+                  } else {
+                    navigation.replace('ProfileScreen');
+                  }
+                } catch (_) {
+                  if (navigation.canGoBack()) {
+                    navigation.goBack();
+                  } else {
+                    navigation.replace('HomeScreen');
+                  }
+                }
+              }}
             >
               <Ionicons name="arrow-back" size={24} color={COLORS.primary1000} />
             </TouchableOpacity>
@@ -589,34 +683,43 @@ export default function EditProfileScreen({ navigation }) {
                  {renderInputField('ID Proof Number', 'id_proof_no', 'Enter ID proof number', 'default', true)}
                  {renderDropdownField('Address Proof Type', 'add_proof_type', addressTypes, true)}
                 {renderInputField('Address Proof Number', 'add_proof_no', 'Enter address proof number', 'default', !((formData.add_proof_type === 'AadhaarCard' || formData.add_proof_type === 'Aadhar') && originalAddProofNo))}
+              </View>
+            </View>
 
-                 {/* File upload pickers (optional) */}
-                 <View style={styles.uploadGroup}>
-                   <Text style={styles.uploadLabel}>ID Proof Image (JPG/PNG, optional, max 2 MB)</Text>
-                   <TouchableOpacity style={styles.uploadBtn} onPress={pickIdProofImage}>
-                     <Ionicons name="image" size={16} color="#fff" />
-                     <Text style={styles.uploadBtnText}>Choose Image</Text>
-                   </TouchableOpacity>
-                   {!!idProofAsset && (
-                     <Text style={styles.fileMeta}>Selected: {idProofAsset.name} {(idProofAsset.size/1024).toFixed(0)} KB</Text>
-                   )}
-                 </View>
+            {/* KYC Details */}
+            <View style={styles.section}>
+              <View style={styles.sectionHeader}>
+                <Text style={styles.sectionTitle}>KYC Details</Text>
+                <View style={styles.sectionLine} />
+              </View>
+              <View style={styles.sectionCard}>
+                {/* File upload pickers (optional) */}
+                <View style={styles.uploadGroup}>
+                  <Text style={styles.uploadLabel}>ID Proof Image (JPG/PNG, optional, max 2 MB)</Text>
+                  <TouchableOpacity style={styles.uploadBtn} onPress={pickIdProofImage}>
+                    <Ionicons name="image" size={16} color="#fff" />
+                    <Text style={styles.uploadBtnText}>Choose Image</Text>
+                  </TouchableOpacity>
+                  {!!idProofAsset && (
+                    <Text style={styles.fileMeta}>Selected: {idProofAsset.name} {(idProofAsset.size/1024).toFixed(0)} KB</Text>
+                  )}
+                </View>
 
-                 <View style={styles.uploadGroup}>
-                   <Text style={styles.uploadLabel}>Address Proof File (optional, max 2 MB)</Text>
-                   <TouchableOpacity style={styles.uploadBtn} onPress={pickAddressProofImage}>
-                     <Ionicons name="image" size={16} color="#fff" />
-                     <Text style={styles.uploadBtnText}>Choose Image</Text>
-                   </TouchableOpacity>
-                   {!!addressProofAsset && (
-                     <Text style={styles.fileMeta}>Selected: {addressProofAsset.name} {(addressProofAsset.size/1024).toFixed(0)} KB</Text>
-                   )}
-                 </View>
+                <View style={styles.uploadGroup}>
+                  <Text style={styles.uploadLabel}>Address Proof File (optional, max 2 MB)</Text>
+                  <TouchableOpacity style={styles.uploadBtn} onPress={pickAddressProofImage}>
+                    <Ionicons name="image" size={16} color="#fff" />
+                    <Text style={styles.uploadBtnText}>Choose Image</Text>
+                  </TouchableOpacity>
+                  {!!addressProofAsset && (
+                    <Text style={styles.fileMeta}>Selected: {addressProofAsset.name} {(addressProofAsset.size/1024).toFixed(0)} KB</Text>
+                  )}
+                </View>
 
-                 {/* Upload KYC button */}
-                 <TouchableOpacity style={[styles.kycUploadBtn, (isUploadingKyc || !canUploadKyc) && styles.saveButtonDisabled]} onPress={handleUploadKyc} disabled={isUploadingKyc || !canUploadKyc}>
-                   <Text style={styles.kycUploadBtnText}>{isUploadingKyc ? 'Uploading…' : 'Upload KYC details'}</Text>
-                 </TouchableOpacity>
+                {/* Upload KYC button */}
+                <TouchableOpacity style={[styles.kycUploadBtn, (isUploadingKyc || !canUploadKyc) && styles.saveButtonDisabled]} onPress={handleUploadKyc} disabled={isUploadingKyc || !canUploadKyc}>
+                  <Text style={styles.kycUploadBtnText}>{isUploadingKyc ? 'Uploading…' : 'Upload KYC details'}</Text>
+                </TouchableOpacity>
               </View>
             </View>
 

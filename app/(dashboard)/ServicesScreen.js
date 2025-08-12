@@ -187,6 +187,7 @@ export default function ServicesScreen({ navigation, route }) {
       logoFileName: m.logo || null,
       kmsRaw: typeof m.kms === 'number' ? m.kms : (m.kms ? Number(m.kms) : null),
       maxDiscount: m.max_discount ? Number(m.max_discount) : null,
+      website: m.merchant_website || m.website || '',
     }));
     setFilteredData(mappedData);
   }, [merchants, serviceConfig]);
@@ -210,6 +211,7 @@ export default function ServicesScreen({ navigation, route }) {
         logoFileName: m.logo || null,
         kmsRaw: typeof m.kms === 'number' ? m.kms : (m.kms ? Number(m.kms) : null),
         maxDiscount: m.max_discount ? Number(m.max_discount) : null,
+        website: m.merchant_website || m.website || '',
       }));
       setFilteredData(mappedData);
       return;
@@ -232,6 +234,7 @@ export default function ServicesScreen({ navigation, route }) {
       logoFileName: m.logo || null,
       kmsRaw: typeof m.kms === 'number' ? m.kms : (m.kms ? Number(m.kms) : null),
       maxDiscount: m.max_discount ? Number(m.max_discount) : null,
+      website: m.merchant_website || m.website || '',
     }))
     .filter((m) => {
       const nameMatch = (m.name || '').toLowerCase().includes(query);
@@ -291,6 +294,15 @@ export default function ServicesScreen({ navigation, route }) {
       console.error('Failed to make call:', err);
       Alert.alert('Error', 'Could not make call. Please try again.');
     }
+  };
+
+  const openWebsite = (website) => {
+    if (!website) return;
+    let url = String(website).trim();
+    if (!/^https?:\/\//i.test(url)) {
+      url = `https://${url}`;
+    }
+    Linking.openURL(url).catch(() => {});
   };
 
   const toggleSideNav = () => {
@@ -382,12 +394,21 @@ export default function ServicesScreen({ navigation, route }) {
         >
           <Text style={styles.cardTitle}>{c.name}</Text>
           {!!c.address && <Text style={styles.cardAddress}>{c.address}</Text>}
+          {!!c.website && (
+            <TouchableOpacity onPress={() => openWebsite(c.website)}>
+              <Text style={styles.websiteLink} numberOfLines={1}>
+                {String(c.website).replace(/^https?:\/\//i, '')}
+              </Text>
+            </TouchableOpacity>
+          )}
 
-          {/* Phone */}
-          <View style={styles.rowCenter}>
-            <Ionicons name="call" size={13} color={COLORS.primary1000} />
-            <Text style={styles.phoneText}>{c.phone}</Text>
-          </View>
+          {/* Phone as clickable link */}
+          {!!c.phone && (
+            <TouchableOpacity style={styles.rowCenter} onPress={() => Linking.openURL(Platform.select({ ios: `tel://${c.phone}`, android: `tel:${c.phone}`, default: `tel:${c.phone}` }))}>
+              <Ionicons name="call" size={13} color={COLORS.primary1000} />
+              <Text style={[styles.phoneText, styles.contactLink]}>{c.phone}</Text>
+            </TouchableOpacity>
+          )}
 
           {/* Chips + trailing icon */}
           <View style={styles.rowBetween}>
@@ -697,6 +718,18 @@ const styles = StyleSheet.create({
   chipText: {
     color: COLORS.chipText,
     fontSize: 10,
+  },
+  websiteLink: {
+    marginTop: 6,
+    color: '#0A4C9A',
+    fontSize: 12,
+    textDecorationLine: 'underline',
+  },
+  contactLink: {
+    marginTop: 4,
+    color: '#0A4C9A',
+    fontSize: 12,
+    textDecorationLine: 'underline',
   },
 });
 

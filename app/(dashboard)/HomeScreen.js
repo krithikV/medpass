@@ -102,14 +102,25 @@ export default function HomeScreen({ navigation }) {
     }
   };
 
-  const handleTabPress = (tabId) => {
+  const handleTabPress = async (tabId) => {
     switch (tabId) {
       case 'home':
         // Already on home screen
         break;
-      case 'wallet':
-        navigation.replace('WalletScreen');
+      case 'wallet': {
+        try {
+          const user = await require('../../utils/userStorage').getUserData();
+          const firstName = user?.userData?.first_name || user?.userData?.firstname || user?.userName;
+          if (!firstName || String(firstName).trim().length === 0) {
+            navigation.replace('EditProfileScreen');
+          } else {
+            navigation.replace('WalletScreen');
+          }
+        } catch (_) {
+          navigation.replace('WalletScreen');
+        }
         break;
+      }
       case 'profile':
         navigation.replace('ProfileScreen');
         break;
@@ -179,6 +190,7 @@ export default function HomeScreen({ navigation }) {
                   style={styles.searchInput}
                   placeholder="Search here"
                   placeholderTextColor="#3a3a3a"
+                  onFocus={() => navigation.navigate('AllServicesScreen')}
                 />
               </View>
             </View>
@@ -251,7 +263,36 @@ export default function HomeScreen({ navigation }) {
         </ScrollView>
 
         {/* Bottom Navigation */}
-        <BottomNavigation activeTab="home" onTabPress={handleTabPress} />
+        <BottomNavigation
+          activeTab="home"
+          onTabPress={handleTabPress}
+          beforeWalletPress={async () => {
+            try {
+              const { needsFirstName } = require('../../utils/userStorage');
+              const shouldRedirect = await needsFirstName();
+              if (shouldRedirect) {
+                navigation.replace('EditProfileScreen');
+                return true; // stop default onTabPress
+              }
+              return false;
+            } catch (_) {
+              return false;
+            }
+          }}
+          beforeProfilePress={async () => {
+            try {
+              const { needsFirstName } = require('../../utils/userStorage');
+              const shouldRedirect = await needsFirstName();
+              if (shouldRedirect) {
+                navigation.replace('EditProfileScreen');
+                return true;
+              }
+              return false;
+            } catch (_) {
+              return false;
+            }
+          }}
+        />
 
         {/* Insurance Modal */}
         <Modal visible={isInsuranceModalVisible} transparent animationType="fade" onRequestClose={closeInsuranceModal}>

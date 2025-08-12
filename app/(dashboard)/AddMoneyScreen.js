@@ -38,6 +38,18 @@ export default function AddMoneyScreen({ navigation }) {
     return () => clearTimeout(timer);
   }, []);
 
+  useEffect(() => {
+    (async () => {
+      try {
+        const { needsFirstName } = require('../../utils/userStorage');
+        const shouldRedirect = await needsFirstName();
+        if (shouldRedirect) {
+          navigation.replace('WalletScreen');
+        }
+      } catch (_) {}
+    })();
+  }, [navigation]);
+
   const presets = ['100', '200', '500', '1000'];
 
   const onSelectPreset = (val) => {

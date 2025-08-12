@@ -197,7 +197,7 @@ export const fetchWalletStatus = async () => {
     const body = new URLSearchParams();
     body.append('mobile', mobile);
 
-    const resp = await fetch(`${API_BASE}/Wallet/MobileValidate`, {
+    const resp = await fetch('http://api.mediimpact.in/index.php/Wallet/MobileValidate', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded',
@@ -208,14 +208,27 @@ export const fetchWalletStatus = async () => {
       body: body.toString(),
     });
 
-    const data = await resp.json();
+    const data = await resp.json().catch(() => ({}));
     if (!resp.ok || data?.status !== 200) {
       return { ok: false, reason: 'bad-status', data };
     }
 
-    return { ok: true, walletStatus: String(data.wallet_status) };
+    const status = String(data.wallet_status ?? '0');
+    // Cache latest in storage for quick reads
+    await AsyncStorage.setItem(USER_STORAGE_KEYS.WALLET_STATUS, status);
+    return { ok: true, walletStatus: status };
   } catch (error) {
     console.error('fetchWalletStatus error:', error);
     return { ok: false, reason: 'exception', error };
+  }
+};
+
+export const needsFirstName = async () => {
+  try {
+    const data = await getUserData();
+    const firstName = data?.userData?.first_name || data?.userData?.firstname || data?.userName;
+    return !firstName || String(firstName).trim().length === 0;
+  } catch (e) {
+    return false;
   }
 };

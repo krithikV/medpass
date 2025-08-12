@@ -2,12 +2,24 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
-export default function BottomNavigation({ activeTab = 'home', onTabPress, bottomOffset = 0 }) {
+export default function BottomNavigation({ activeTab = 'home', onTabPress, bottomOffset = 0, beforeWalletPress, beforeProfilePress }) {
   const tabs = [
     { id: 'home', label: 'Home', icon: { active: 'home-outline', inactive: 'home-outline' } },
     { id: 'wallet', label: 'Wallet', icon: { active: 'wallet', inactive: 'wallet-outline' } },
     { id: 'profile', label: 'Profile', icon: { active: 'account-circle', inactive: 'account-circle-outline' } },
   ];
+
+  const handlePress = async (tabId) => {
+    if (tabId === 'wallet' && typeof beforeWalletPress === 'function') {
+      const shouldStop = await beforeWalletPress();
+      if (shouldStop) return;
+    }
+    if (tabId === 'profile' && typeof beforeProfilePress === 'function') {
+      const shouldStop = await beforeProfilePress();
+      if (shouldStop) return;
+    }
+    onTabPress && onTabPress(tabId);
+  };
 
   return (
     <View style={[styles.bottomNav, { bottom: bottomOffset }]}>
@@ -15,7 +27,7 @@ export default function BottomNavigation({ activeTab = 'home', onTabPress, botto
         <TouchableOpacity
           key={tab.id}
           style={styles.navItem}
-          onPress={() => onTabPress && onTabPress(tab.id)}
+          onPress={() => handlePress(tab.id)}
         >
           <MaterialCommunityIcons
             name={activeTab === tab.id ? tab.icon.active : tab.icon.inactive}
