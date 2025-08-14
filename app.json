@@ -17,7 +17,7 @@
       "infoPlist": {
         "NSLocationWhenInUseUsageDescription": "This app needs access to location to provide location-based services."
       },
-      "bundleIdentifier": "com.mediimpact.medpass"
+      "bundleIdentifier": "com.ksm.medpass"
     },
     "android": {
       "adaptiveIcon": {
@@ -29,7 +29,7 @@
         "ACCESS_FINE_LOCATION",
         "ACCESS_COARSE_LOCATION"
       ],
-      "package": "com.mediimpact.medpass"
+      "package": "com.ksm.medpass"
     },
     "web": {
       "favicon": "./assets/favicon.png"
