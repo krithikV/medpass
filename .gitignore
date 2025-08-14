@@ -1,6 +1,5 @@
 node_modules/
 .expo/
 package-lock.json
-android/
-ios/
+
 *.apk
